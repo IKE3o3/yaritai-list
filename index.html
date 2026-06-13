@@ -78,7 +78,12 @@
     .tab-other     { border-color: #D3D1C7; color: #5F5E5A; }
     .tab-done      { border-color: #ccc; color: #555; }
 
-    .add-card { background: #fff; border-radius: 16px; padding: 1.25rem; margin-bottom: 1.25rem; box-shadow: 0 2px 12px rgba(0,0,0,0.07); }
+    .fab { position: fixed; bottom: 1.5rem; right: 1.5rem; width: 56px; height: 56px; border-radius: 50%; background: #1D9E75; border: none; color: #fff; font-size: 28px; cursor: pointer; box-shadow: 0 4px 16px rgba(29,158,117,0.4); z-index: 50; display: flex; align-items: center; justify-content: center; transition: transform .2s; }
+    .fab:active { transform: scale(0.93); }
+    .add-sheet-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 60; }
+    .add-sheet { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-radius: 24px 24px 0 0; padding: 1.25rem 1.25rem 2.5rem; z-index: 70; box-shadow: 0 -4px 24px rgba(0,0,0,0.12); }
+    .sheet-handle { width: 36px; height: 4px; background: #ddd; border-radius: 99px; margin: 0 auto 1.25rem; }
+    .add-card { background: transparent; }
     .add-card input[type=text] { width: 100%; font-size: 15px; padding: 10px 14px; border-radius: 10px; border: 1.5px solid #e0e0e0; background: #fafafa; margin-bottom: 10px; }
     .add-card input[type=text]:focus { outline: none; border-color: #1D9E75; background: #fff; }
     .add-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
@@ -171,6 +176,35 @@
     <button class="tab tab-done" onclick="setFilter('done')">達成済み</button>
   </div>
 
+
+  <div id="items-list" class="items"><div class="empty"><span class="empty-icon">📝</span>読み込み中...</div></div>
+</div>
+
+<div class="confetti-wrap" id="confetti-wrap"></div>
+
+<div id="badge-modal-bg" class="badge-modal-bg" style="display:none" onclick="if(event.target===this)closeBadgeModal()">
+  <div class="badge-modal">
+    <h2>🏅 バッジコレクション</h2>
+    <div class="badge-grid" id="badge-grid"></div>
+    <button class="modal-close" onclick="closeBadgeModal()">閉じる</button>
+  </div>
+</div>
+
+<div id="confirm-modal-bg" class="confirm-modal-bg" style="display:none">
+  <div class="confirm-modal">
+    <p>「<span class="confirm-text" id="confirm-item-text"></span>」を削除しますか？</p>
+    <div class="confirm-btns">
+      <button class="confirm-cancel" onclick="closeConfirm()">キャンセル</button>
+      <button class="confirm-del" onclick="confirmDelete()">削除</button>
+    </div>
+  </div>
+</div>
+
+<button class="fab" onclick="openSheet()" id="fab">＋</button>
+
+<div class="add-sheet-bg" id="sheet-bg" style="display:none" onclick="closeSheet()"></div>
+<div class="add-sheet" id="add-sheet" style="display:none">
+  <div class="sheet-handle"></div>
   <div class="add-card">
     <input id="new-item" type="text" placeholder="やりたいことを入力..." onkeydown="if(event.key==='Enter')addItem()">
     <div class="with-label">誰と？</div>
@@ -192,28 +226,6 @@
     </div>
     <div class="add-row2">
       <button class="add-btn" onclick="addItem()" style="width:100%">＋ 追加</button>
-    </div>
-  </div>
-
-  <div id="items-list" class="items"><div class="empty"><span class="empty-icon">📝</span>読み込み中...</div></div>
-</div>
-
-<div class="confetti-wrap" id="confetti-wrap"></div>
-
-<div id="badge-modal-bg" class="badge-modal-bg" style="display:none" onclick="if(event.target===this)closeBadgeModal()">
-  <div class="badge-modal">
-    <h2>🏅 バッジコレクション</h2>
-    <div class="badge-grid" id="badge-grid"></div>
-    <button class="modal-close" onclick="closeBadgeModal()">閉じる</button>
-  </div>
-</div>
-
-<div id="confirm-modal-bg" class="confirm-modal-bg" style="display:none">
-  <div class="confirm-modal">
-    <p>「<span class="confirm-text" id="confirm-item-text"></span>」を削除しますか？</p>
-    <div class="confirm-btns">
-      <button class="confirm-cancel" onclick="closeConfirm()">キャンセル</button>
-      <button class="confirm-del" onclick="confirmDelete()">削除</button>
     </div>
   </div>
 </div>
@@ -243,6 +255,16 @@ const withLabel = { solo: '1人で', friends: '友達と', partner: '恋人と',
 
 let items = [], filter = 'all', editingId = null, prevDoneCount = 0;
 let longPressTimer = null, pendingDeleteId = null, selectedWith = null;
+
+function openSheet() {
+  document.getElementById('sheet-bg').style.display = 'block';
+  document.getElementById('add-sheet').style.display = 'block';
+  setTimeout(() => document.getElementById('new-item').focus(), 100);
+}
+function closeSheet() {
+  document.getElementById('sheet-bg').style.display = 'none';
+  document.getElementById('add-sheet').style.display = 'none';
+}
 
 function selectWith(val) {
   selectedWith = selectedWith === val ? null : val;
@@ -331,6 +353,8 @@ async function addItem() {
     items.push(item);
     selectedWith = null;
     ['solo','friends','partner','anyone'].forEach(k => { const el = document.getElementById('with-'+k); if(el) el.classList.remove('selected'); });
+    document.getElementById('new-deadline').value = '';
+    closeSheet();
     render(); showError('');
   } catch(e) { showError('追加失敗: ' + e.message); inp.value = text; }
 }
@@ -473,7 +497,7 @@ function render() {
             ${item.achieved_at ? `<span class="achieved-badge">✓ ${formatDate(item.achieved_at)} 達成</span>` : ''}
           </div>
           ${mediaHtml}
-          ${!item.image_url ? `
+          ${isEditing && !item.image_url ? `
             <label class="upload-btn" for="file-${item.id}">📷 写真・動画を追加</label>
             <input class="file-input" type="file" id="file-${item.id}" accept="image/*,video/*" onchange="uploadMedia(${item.id}, this.files[0])">
             <span class="uploading" id="upload-status-${item.id}"></span>
