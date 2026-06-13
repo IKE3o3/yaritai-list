@@ -91,6 +91,7 @@
     .tab-learn     { border-color: #AFA9EC; color: #3C3489; }
     .tab-other     { border-color: #D3D1C7; color: #5F5E5A; }
     .tab-done      { border-color: #ccc; color: #555; }
+    .tab-with.active { background: #555; border-color: #555; color: #fff; }
 
     .fab { position: fixed; bottom: 1.5rem; right: 1.5rem; width: 56px; height: 56px; border-radius: 50%; background: #1D9E75; border: none; color: #fff; font-size: 28px; cursor: pointer; box-shadow: 0 4px 16px rgba(29,158,117,0.4); z-index: 50; display: flex; align-items: center; justify-content: center; transition: transform .2s; }
     .fab:active { transform: scale(0.93); }
@@ -193,6 +194,13 @@
     <button class="tab tab-other" onclick="setFilter('other')">その他</button>
     <button class="tab tab-done" onclick="setFilter('done')">達成済み</button>
   </div>
+  <div class="tabs" style="margin-top:-6px">
+    <button class="tab tab-with active" id="wtab-all" onclick="setWithFilter(null)">全員</button>
+    <button class="tab tab-with" id="wtab-solo" onclick="setWithFilter('solo')">1人で</button>
+    <button class="tab tab-with" id="wtab-friends" onclick="setWithFilter('friends')">友達と</button>
+    <button class="tab tab-with" id="wtab-partner" onclick="setWithFilter('partner')">恋人と</button>
+    <button class="tab tab-with" id="wtab-anyone" onclick="setWithFilter('anyone')">誰でも</button>
+  </div>
 
 
   <div id="items-list" class="items"><div class="empty"><span class="empty-icon">📝</span>読み込み中...</div></div>
@@ -274,7 +282,7 @@ const withLabel = { solo: '1人で', friends: '友達と', partner: '恋人と',
 
 let items = [], filter = 'all', editingId = null, prevDoneCount = 0;
 let pendingDeleteId = null, selectedWith = null, selectedCat = 'travel';
-let editingCat = null, editingWith = null;
+let editingCat = null, editingWith = null, filterWith = null;
 
 function openSheet() {
   document.getElementById('sheet-bg').style.display = 'block';
@@ -500,7 +508,16 @@ async function uploadMedia(id, file) {
 function setFilter(f) {
   filter = f;
   const filters = ['all','travel','experience','food','learn','other','done'];
-  document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', filters[i] === f));
+  document.querySelectorAll('.tab:not(.tab-with)').forEach((t, i) => t.classList.toggle('active', filters[i] === f));
+  render();
+}
+
+function setWithFilter(w) {
+  filterWith = w;
+  ['all','solo','friends','partner','anyone'].forEach(k => {
+    const el = document.getElementById('wtab-' + k);
+    if (el) el.classList.toggle('active', (w === null && k === 'all') || w === k);
+  });
   render();
 }
 
@@ -520,6 +537,7 @@ function render() {
   let visible = items;
   if (filter === 'done') visible = items.filter(i => i.done);
   else if (filter !== 'all') visible = items.filter(i => i.cat === filter);
+  if (filterWith) visible = visible.filter(i => i.with_who === filterWith);
   if (q) visible = visible.filter(i => i.text.toLowerCase().includes(q));
 
   const el = document.getElementById('items-list');
