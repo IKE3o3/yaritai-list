@@ -534,9 +534,9 @@ function render() {
   document.getElementById('current-badge').textContent = `${badge.icon} ${badge.name}  ›`;
 
   const q = document.getElementById('search-input').value.toLowerCase();
-  let visible = items;
-  if (filter === 'done') visible = items.filter(i => i.done);
-  else if (filter !== 'all') visible = items.filter(i => i.cat === filter);
+  let visible = [...items].sort((a, b) => a.done - b.done);
+  if (filter === 'done') visible = visible.filter(i => i.done);
+  else if (filter !== 'all') visible = visible.filter(i => i.cat === filter);
   if (filterWith) visible = visible.filter(i => i.with_who === filterWith);
   if (q) visible = visible.filter(i => i.text.toLowerCase().includes(q));
 
