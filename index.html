@@ -143,6 +143,10 @@
     .deadline-badge { font-size: 11px; color: #888; }
     .deadline-badge.overdue { color: #e05; }
     .achieved-badge { font-size: 11px; color: #1D9E75; }
+    .item-memo { font-size: 12px; color: #888; margin-top: 4px; line-height: 1.4; }
+    .priority-section { margin-bottom: 16px; }
+    .priority-label { font-size: 12px; font-weight: 700; color: #E07B00; margin-bottom: 8px; display: flex; align-items: center; gap: 5px; }
+    .item.priority { border-left: 3px solid #F5A623; }
 
     .item-image { margin-top: 10px; border-radius: 10px; overflow: hidden; }
     .item-image img { width: 100%; max-height: 200px; object-fit: cover; display: block; }
@@ -322,6 +326,7 @@ function openActionMenu(id, btnEl) {
   menu.style.cssText = `position:fixed;top:${rect.bottom + 4}px;right:${window.innerWidth - rect.right}px`;
   menu.innerHTML = `
     <button onclick="closeActionMenu();startEdit(${id})">✏️ 編集</button>
+    <button onclick="closeActionMenu();togglePriority(${id})">${item.priority ? '✕ Next Upから外す' : '🔥 Next Up'}</button>
     <button class="action-del" onclick="closeActionMenu();askDelete(${id})">🗑️ 削除</button>`;
   document.body.appendChild(bg);
   document.body.appendChild(menu);
@@ -332,6 +337,17 @@ function openMediaViewer(url, isVideo) {
   bg.onclick = () => bg.remove();
   bg.innerHTML = `<span class="media-viewer-close">✕</span>${isVideo ? `<video src="${url}" controls playsinline autoplay style="max-width:95vw;max-height:90vh;border-radius:12px"></video>` : `<img src="${url}" style="max-width:95vw;max-height:90vh;border-radius:12px">`}`;
   document.body.appendChild(bg);
+}
+
+async function togglePriority(id) {
+  const item = items.find(i => i.id === id);
+  if (!item) return;
+  item.priority = !item.priority;
+  render();
+  try {
+    const res = await fetch(`${API}?id=eq.${id}`, { method: 'PATCH', headers: H, body: JSON.stringify({ priority: item.priority }) });
+    if (!res.ok) throw new Error(await res.text());
+  } catch(e) { item.priority = !item.priority; render(); showError('更新失敗: ' + e.message); }
 }
 
 function closeActionMenu() {
@@ -470,17 +486,19 @@ async function saveEdit(id) {
   if (!text) return;
   const item = items.find(i => i.id === id);
   if (!item) return;
-  const oldText = item.text, oldCat = item.cat, oldWith = item.with_who, oldAchieved = item.achieved_at;
+  const oldText = item.text, oldCat = item.cat, oldWith = item.with_who, oldAchieved = item.achieved_at, oldMemo = item.memo;
   item.text = text;
   if (editingCat) item.cat = editingCat;
   item.with_who = editingWith || null;
   const achievedInput = document.getElementById(`edit-achieved-${id}`);
   if (achievedInput) item.achieved_at = achievedInput.value ? achievedInput.value + 'T00:00:00+09:00' : null;
+  const memoInput = document.getElementById(`edit-memo-${id}`);
+  item.memo = memoInput ? memoInput.value.trim() || null : item.memo;
   editingId = null; render();
   try {
-    const res = await fetch(`${API}?id=eq.${id}`, { method: 'PATCH', headers: H, body: JSON.stringify({ text, cat: item.cat, with_who: item.with_who, achieved_at: item.achieved_at }) });
+    const res = await fetch(`${API}?id=eq.${id}`, { method: 'PATCH', headers: H, body: JSON.stringify({ text, cat: item.cat, with_who: item.with_who, achieved_at: item.achieved_at, memo: item.memo }) });
     if (!res.ok) throw new Error(await res.text());
-  } catch(e) { item.text = oldText; item.cat = oldCat; item.with_who = oldWith; item.achieved_at = oldAchieved; render(); showError('編集失敗: ' + e.message); }
+  } catch(e) { item.text = oldText; item.cat = oldCat; item.with_who = oldWith; item.achieved_at = oldAchieved; item.memo = oldMemo; render(); showError('編集失敗: ' + e.message); }
 }
 
 async function uploadMedia(id, file) {
@@ -545,12 +563,18 @@ function render() {
     return;
   }
 
-  el.innerHTML = visible.map(item => {
+  const priorityItems = visible.filter(i => i.priority && !i.done);
+  const restItems = visible.filter(i => !i.priority || i.done);
+  const priorityHtml = priorityItems.length ? `<div class="priority-section"><div class="priority-label">🔥 Next Up</div><div class="items" style="gap:10px">${priorityItems.map(item => renderItem(item)).join('')}</div></div>` : '';
+  el.innerHTML = priorityHtml + restItems.map(item => renderItem(item)).join('');
+}
+
+function renderItem(item) {
     const isVideo = item.image_url && (item.image_url.includes('.mp4')||item.image_url.includes('.mov')||item.image_url.includes('.webm'));
     const overdue = !item.done && isOverdue(item.deadline);
     const isEditing = editingId === item.id;
 
-    return `<div class="item${item.done?' done':''}">
+    return `<div class="item${item.done?' done':''}${item.priority&&!item.done?' priority':''}">
       <div class="item-top">
         <button class="check-btn${item.done?' checked':''}" onclick="toggle(${item.id})">
           <svg class="check-icon" viewBox="0 0 13 13"><polyline points="1.5,6.5 5,10 11,2.5"/></svg>
@@ -568,6 +592,7 @@ function render() {
               <span>達成日</span>
               <input type="date" id="edit-achieved-${item.id}" value="${item.achieved_at ? item.achieved_at.slice(0,10) : ''}" style="font-size:13px;padding:4px 8px;border-radius:8px;border:1.5px solid #e0e0e0;background:#fafafa">
             </div>` : ''}
+            <textarea id="edit-memo-${item.id}" placeholder="一言メモ（任意）" style="width:100%;font-size:13px;padding:6px 10px;border-radius:8px;border:1.5px solid #e0e0e0;background:#fafafa;resize:none;height:56px;margin-bottom:6px;font-family:inherit">${item.memo||''}</textarea>
             <div class="item-edit-actions">
               <button class="edit-save-btn" onclick="saveEdit(${item.id})">保存</button>
               <button class="edit-cancel-btn" onclick="cancelEdit()">キャンセル</button>
@@ -578,7 +603,8 @@ function render() {
             ${item.with_who && withLabel[item.with_who] ? `<span class="with-badge">${withLabel[item.with_who]}</span>` : ''}
             ${item.deadline ? `<span class="deadline-badge${overdue?' overdue':''}">📅 ${formatDate(item.deadline)}${overdue?' 期限切れ':''}</span>` : ''}
             ${item.achieved_at ? `<span class="achieved-badge">✓ ${formatDate(item.achieved_at)} 達成</span>` : ''}
-          </div>` : ''}
+          </div>
+          ${item.memo ? `<div class="item-memo">${item.memo}</div>` : ''}` : ''}
           ${isEditing ? `
             <label class="upload-btn" for="file-${item.id}">📷 ${item.image_url ? '写真・動画を変更' : '写真・動画を追加'}</label>
             <input class="file-input" type="file" id="file-${item.id}" accept="image/*,video/*" onchange="uploadMedia(${item.id}, this.files[0])">
@@ -589,7 +615,6 @@ function render() {
         <button style="background:transparent;border:none;color:#bbb;font-size:20px;cursor:pointer;padding:2px 8px;flex-shrink:0;line-height:1" onclick="openActionMenu(${item.id},this)">⋯</button>
       </div>
     </div>`;
-  }).join('');
 }
 
 loadItems();
