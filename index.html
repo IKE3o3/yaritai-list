@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>やりたいことリスト</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f0; min-height: 100vh; color: #1a1a1a; }
+    .container { max-width: 640px; margin: 0 auto; padding: 1.5rem 1rem 4rem; }
+    h1 { font-size: 24px; font-weight: 600; margin-bottom: 0.25rem; }
+    .progress-text { font-size: 14px; color: #666; margin-bottom: 1.25rem; }
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 1.5rem; }
+    .stat { background: #fff; border-radius: 12px; padding: 0.875rem 1rem; border: 1px solid #e8e8e4; }
+    .stat-num { font-size: 22px; font-weight: 600; }
+    .stat-label { font-size: 12px; color: #888; margin-top: 2px; }
+    .tabs { display: flex; gap: 6px; margin-bottom: 1rem; flex-wrap: wrap; }
+    .tab { padding: 6px 12px; border-radius: 8px; border: 1px solid #ddd; background: #fff; color: #666; font-size: 13px; cursor: pointer; transition: all .15s; }
+    .tab.active { background: #1a1a1a; border-color: #1a1a1a; color: #fff; font-weight: 500; }
+    .add-form { display: flex; gap: 8px; margin-bottom: 1.25rem; flex-wrap: wrap; }
+    .add-form input { flex: 1; min-width: 160px; font-size: 15px; padding: 10px 14px; border-radius: 10px; border: 1px solid #ddd; background: #fff; }
+    .add-form input:focus { outline: none; border-color: #999; }
+    .add-form select { font-size: 13px; padding: 10px 10px; border-radius: 10px; border: 1px solid #ddd; background: #fff; }
+    .add-btn { padding: 10px 18px; border-radius: 10px; border: none; background: #1a1a1a; color: #fff; font-size: 14px; font-weight: 500; cursor: pointer; white-space: nowrap; }
+    .add-btn:active { opacity: 0.8; }
+    .items { display: flex; flex-direction: column; gap: 8px; }
+    .item { display: flex; align-items: center; gap: 12px; background: #fff; border: 1px solid #e8e8e4; border-radius: 12px; padding: 0.875rem 1rem; }
+    .item.done .item-text { text-decoration: line-through; color: #aaa; }
+    .check-btn { width: 24px; height: 24px; border-radius: 50%; border: 1.5px solid #ccc; background: transparent; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all .15s; }
+    .check-btn.checked { background: #1D9E75; border-color: #1D9E75; }
+    .check-icon { display: none; width: 12px; height: 12px; stroke: #fff; stroke-width: 2.5; fill: none; }
+    .check-btn.checked .check-icon { display: block; }
+    .item-text { flex: 1; font-size: 15px; line-height: 1.4; }
+    .cat-badge { font-size: 11px; padding: 3px 8px; border-radius: 6px; flex-shrink: 0; font-weight: 500; }
+    .cat-travel { background: #E1F5EE; color: #0F6E56; }
+    .cat-hobby { background: #EEEDFE; color: #3C3489; }
+    .cat-career { background: #E6F1FB; color: #0C447C; }
+    .del-btn { background: transparent; border: none; color: #ccc; cursor: pointer; font-size: 18px; line-height: 1; flex-shrink: 0; padding: 2px 4px; border-radius: 4px; }
+    .del-btn:hover { color: #999; }
+    .empty { text-align: center; padding: 3rem 1rem; color: #bbb; font-size: 14px; }
+    .loading { text-align: center; padding: 2rem; color: #999; font-size: 14px; }
+    .error-banner { background: #FEE; border: 1px solid #FCC; border-radius: 10px; padding: 0.75rem 1rem; margin-bottom: 1rem; font-size: 13px; color: #c00; }
+    .setup-banner { background: #FFF8E1; border: 1px solid #FFE082; border-radius: 10px; padding: 1rem 1.25rem; margin-bottom: 1.25rem; font-size: 13px; line-height: 1.7; }
+    .setup-banner strong { display: block; margin-bottom: 4px; font-size: 14px; }
+    .setup-banner code { background: #f0ead0; padding: 1px 5px; border-radius: 4px; font-family: monospace; font-size: 12px; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>やりたいことリスト</h1>
+  <p class="progress-text" id="progress-text">読み込み中...</p>
+
+  <div class="stats">
+    <div class="stat"><div class="stat-num" id="stat-total">-</div><div class="stat-label">合計</div></div>
+    <div class="stat"><div class="stat-num" id="stat-done">-</div><div class="stat-label">達成済み</div></div>
+    <div class="stat"><div class="stat-num" id="stat-pct">-%</div><div class="stat-label">達成率</div></div>
+  </div>
+
+  <div id="setup-banner" class="setup-banner" style="display:none">
+    <strong>⚠️ Supabase の設定が必要です</strong>
+    このファイルの先頭にある <code>SUPABASE_URL</code> と <code>SUPABASE_ANON_KEY</code> を設定してください。<br>
+    設定方法は同梱の <code>README.md</code> を参照してください。
+  </div>
+
+  <div id="error-banner" class="error-banner" style="display:none"></div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="setFilter('all')">すべて</button>
+    <button class="tab" onclick="setFilter('travel')">✈️ 旅行</button>
+    <button class="tab" onclick="setFilter('hobby')">🎨 趣味・スキル</button>
+    <button class="tab" onclick="setFilter('career')">💼 仕事・キャリア</button>
+    <button class="tab" onclick="setFilter('done')">✓ 達成済み</button>
+  </div>
+
+  <div class="add-form">
+    <input id="new-item" type="text" placeholder="やりたいことを入力..." onkeydown="if(event.key==='Enter')addItem()">
+    <select id="new-cat">
+      <option value="travel">旅行</option>
+      <option value="hobby">趣味・スキル</option>
+      <option value="career">仕事・キャリア</option>
+    </select>
+    <button class="add-btn" onclick="addItem()">＋ 追加</button>
+  </div>
+
+  <div id="items-list" class="items"><div class="loading">読み込み中...</div></div>
+</div>
+
+<script>
+// =============================================
+// 🔧 ここにSupabaseの設定を入力してください
+// =============================================
+const SUPABASE_URL = 'https://fbqxmjcgicsgzhxnntgw.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZicXhtamNnaWNzZ3poeG5udGd3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzNDg3MzIsImV4cCI6MjA5NjkyNDczMn0.t5b3yObOhm2cdYULIyfkxPxjQplu-rEH-LENjT-t3Jg';
+// =============================================
+
+const isConfigured = SUPABASE_URL !== 'YOUR_SUPABASE_URL';
+const API = `${SUPABASE_URL}/rest/v1/bucket_list`;
+const HEADERS = {
+  'apikey': SUPABASE_ANON_KEY,
+  'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+  'Content-Type': 'application/json',
+  'Prefer': 'return=representation'
+};
+
+let items = [];
+let filter = 'all';
+
+const catLabel = { travel: '旅行', hobby: '趣味・スキル', career: '仕事・キャリア' };
+const catClass = { travel: 'cat-travel', hobby: 'cat-hobby', career: 'cat-career' };
+
+function showError(msg) {
+  const el = document.getElementById('error-banner');
+  el.textContent = msg;
+  el.style.display = msg ? 'block' : 'none';
+}
+
+async function loadItems() {
+  if (!isConfigured) {
+    document.getElementById('setup-banner').style.display = 'block';
+    items = [];
+    render();
+    return;
+  }
+  try {
+    const res = await fetch(`${API}?order=created_at.asc`, { headers: HEADERS });
+    if (!res.ok) throw new Error(await res.text());
+    items = await res.json();
+    render();
+  } catch (e) {
+    showError('データの読み込みに失敗しました: ' + e.message);
+    render();
+  }
+}
+
+async function addItem() {
+  if (!isConfigured) return;
+  const inp = document.getElementById('new-item');
+  const cat = document.getElementById('new-cat').value;
+  const text = inp.value.trim();
+  if (!text) return;
+  inp.value = '';
+  try {
+    const res = await fetch(API, {
+      method: 'POST',
+      headers: HEADERS,
+      body: JSON.stringify({ text, cat, done: false })
+    });
+    if (!res.ok) throw new Error(await res.text());
+    const [newItem] = await res.json();
+    items.push(newItem);
+    render();
+    showError('');
+  } catch (e) {
+    showError('追加に失敗しました: ' + e.message);
+    inp.value = text;
+  }
+}
+
+async function toggle(id) {
+  const item = items.find(i => i.id === id);
+  if (!item) return;
+  const newDone = !item.done;
+  item.done = newDone;
+  render();
+  try {
+    const res = await fetch(`${API}?id=eq.${id}`, {
+      method: 'PATCH',
+      headers: HEADERS,
+      body: JSON.stringify({ done: newDone })
+    });
+    if (!res.ok) throw new Error(await res.text());
+    showError('');
+  } catch (e) {
+    item.done = !newDone;
+    render();
+    showError('更新に失敗しました: ' + e.message);
+  }
+}
+
+async function del(id) {
+  const prev = [...items];
+  items = items.filter(i => i.id !== id);
+  render();
+  try {
+    const res = await fetch(`${API}?id=eq.${id}`, { method: 'DELETE', headers: HEADERS });
+    if (!res.ok) throw new Error(await res.text());
+    showError('');
+  } catch (e) {
+    items = prev;
+    render();
+    showError('削除に失敗しました: ' + e.message);
+  }
+}
+
+function setFilter(f) {
+  filter = f;
+  document.querySelectorAll('.tab').forEach((t, i) => {
+    t.classList.toggle('active', ['all','travel','hobby','career','done'][i] === f);
+  });
+  render();
+}
+
+function render() {
+  const total = items.length;
+  const done = items.filter(i => i.done).length;
+  const pct = total ? Math.round(done / total * 100) : 0;
+  document.getElementById('stat-total').textContent = total;
+  document.getElementById('stat-done').textContent = done;
+  document.getElementById('stat-pct').textContent = pct + '%';
+  document.getElementById('progress-text').textContent =
+    total === 0 ? 'さあ、夢を書き出そう' :
+    pct === 100 ? '全て達成！素晴らしい！🎉' :
+    `${done}/${total} 達成中`;
+
+  let visible = items;
+  if (filter === 'done') visible = items.filter(i => i.done);
+  else if (filter !== 'all') visible = items.filter(i => i.cat === filter);
+
+  const el = document.getElementById('items-list');
+  if (visible.length === 0) {
+    el.innerHTML = `<div class="empty">${filter === 'done' ? 'まだ達成したものがありません' : 'このカテゴリにアイテムがありません'}</div>`;
+    return;
+  }
+  el.innerHTML = visible.map(item => `
+    <div class="item${item.done ? ' done' : ''}">
+      <button class="check-btn${item.done ? ' checked' : ''}" onclick="toggle(${item.id})" aria-label="${item.done ? '未達成に戻す' : '達成済みにする'}">
+        <svg class="check-icon" viewBox="0 0 12 12"><polyline points="1.5,6 5,9.5 10.5,2.5"/></svg>
+      </button>
+      <span class="item-text">${item.text}</span>
+      <span class="cat-badge ${catClass[item.cat]}">${catLabel[item.cat]}</span>
+      <button class="del-btn" onclick="del(${item.id})" aria-label="削除">×</button>
+    </div>
+  `).join('');
+}
+
+loadItems();
+</script>
+</body>
+</html>
