@@ -248,9 +248,6 @@
       <button type="button" class="with-pill" onclick="selectWith('partner')" id="with-partner">恋人と</button>
       <button type="button" class="with-pill" onclick="selectWith('anyone')" id="with-anyone">誰でも</button>
     </div>
-    <div class="add-row">
-      <input type="date" id="new-deadline" title="期限" style="width:100%">
-    </div>
     <div class="add-row2">
       <button class="add-btn" onclick="addItem()" style="width:100%">＋ 追加</button>
     </div>
@@ -473,15 +470,17 @@ async function saveEdit(id) {
   if (!text) return;
   const item = items.find(i => i.id === id);
   if (!item) return;
-  const oldText = item.text, oldCat = item.cat, oldWith = item.with_who;
+  const oldText = item.text, oldCat = item.cat, oldWith = item.with_who, oldAchieved = item.achieved_at;
   item.text = text;
   if (editingCat) item.cat = editingCat;
   item.with_who = editingWith || null;
+  const achievedInput = document.getElementById(`edit-achieved-${id}`);
+  if (achievedInput) item.achieved_at = achievedInput.value ? achievedInput.value + 'T00:00:00+09:00' : null;
   editingId = null; render();
   try {
-    const res = await fetch(`${API}?id=eq.${id}`, { method: 'PATCH', headers: H, body: JSON.stringify({ text, cat: item.cat, with_who: item.with_who }) });
+    const res = await fetch(`${API}?id=eq.${id}`, { method: 'PATCH', headers: H, body: JSON.stringify({ text, cat: item.cat, with_who: item.with_who, achieved_at: item.achieved_at }) });
     if (!res.ok) throw new Error(await res.text());
-  } catch(e) { item.text = oldText; item.cat = oldCat; item.with_who = oldWith; render(); showError('編集失敗: ' + e.message); }
+  } catch(e) { item.text = oldText; item.cat = oldCat; item.with_who = oldWith; item.achieved_at = oldAchieved; render(); showError('編集失敗: ' + e.message); }
 }
 
 async function uploadMedia(id, file) {
@@ -565,6 +564,10 @@ function render() {
             <div class="with-pills" style="margin:4px 0 8px">
               ${['solo','friends','partner','anyone'].map(k=>`<button type="button" class="with-pill${editingWith===k?' selected':''}" id="ewith-${item.id}-${k}" onclick="selectEditWith('${k}')">${withLabel[k]}</button>`).join('')}
             </div>
+            ${item.done ? `<div style="margin:4px 0 8px;display:flex;align-items:center;gap:8px;font-size:13px;color:#666">
+              <span>達成日</span>
+              <input type="date" id="edit-achieved-${item.id}" value="${item.achieved_at ? item.achieved_at.slice(0,10) : ''}" style="font-size:13px;padding:4px 8px;border-radius:8px;border:1.5px solid #e0e0e0;background:#fafafa">
+            </div>` : ''}
             <div class="item-edit-actions">
               <button class="edit-save-btn" onclick="saveEdit(${item.id})">保存</button>
               <button class="edit-cancel-btn" onclick="cancelEdit()">キャンセル</button>
@@ -582,7 +585,7 @@ function render() {
             <span class="uploading" id="upload-status-${item.id}"></span>
           ` : ''}
         </div>
-        ${item.image_url && !isEditing ? `<div class="item-thumb" onclick="openMediaViewer('${item.image_url}',${isVideo})">${isVideo?`<video src="${item.image_url}" style="width:64px;height:64px;object-fit:cover;border-radius:8px" playsinline muted></video>`:`<img src="${item.image_url}" style="width:64px;height:64px;object-fit:cover;border-radius:8px">`}</div>` : ''}
+        ${item.image_url && !isEditing ? `<div class="item-thumb" onclick="openMediaViewer('${item.image_url}',${isVideo})">${isVideo ? `<div style="width:64px;height:64px;border-radius:8px;background:#111;display:flex;align-items:center;justify-content:center;font-size:24px">▶</div>` : `<img src="${item.image_url}" style="width:64px;height:64px;object-fit:cover;border-radius:8px">`}</div>` : ''}
         <button style="background:transparent;border:none;color:#bbb;font-size:20px;cursor:pointer;padding:2px 8px;flex-shrink:0;line-height:1" onclick="openActionMenu(${item.id},this)">⋯</button>
       </div>
     </div>`;
