@@ -113,7 +113,11 @@
     .items { display: flex; flex-direction: column; gap: 10px; }
     .item { background: #fff; border-radius: 16px; padding: 1rem 1.1rem; box-shadow: 0 2px 10px rgba(0,0,0,0.06); overflow: hidden; transition: opacity .2s; }
     .item.done { opacity: 0.6; }
-    .item-top { display: flex; align-items: flex-start; gap: 12px; }
+    .item-top { display: flex; align-items: center; gap: 12px; }
+    .item-thumb { flex-shrink: 0; cursor: pointer; }
+    .media-viewer-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 200; display: flex; align-items: center; justify-content: center; }
+    .media-viewer-bg img, .media-viewer-bg video { max-width: 95vw; max-height: 90vh; border-radius: 12px; }
+    .media-viewer-close { position: fixed; top: 16px; right: 20px; color: #fff; font-size: 32px; cursor: pointer; z-index: 201; }
     .check-btn { width: 26px; height: 26px; border-radius: 50%; border: 2px solid #ccc; background: transparent; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all .2s; margin-top: 1px; }
     .check-btn.checked { background: #1D9E75; border-color: #1D9E75; }
     .check-icon { display: none; width: 13px; height: 13px; stroke: #fff; stroke-width: 2.5; fill: none; }
@@ -270,6 +274,7 @@ const withLabel = { solo: '1人で', friends: '友達と', partner: '恋人と',
 
 let items = [], filter = 'all', editingId = null, prevDoneCount = 0;
 let pendingDeleteId = null, selectedWith = null, selectedCat = 'travel';
+let editingCat = null, editingWith = null;
 
 function openSheet() {
   document.getElementById('sheet-bg').style.display = 'block';
@@ -316,6 +321,14 @@ function openActionMenu(id, btnEl) {
   document.body.appendChild(bg);
   document.body.appendChild(menu);
 }
+function openMediaViewer(url, isVideo) {
+  const bg = document.createElement('div');
+  bg.className = 'media-viewer-bg';
+  bg.onclick = () => bg.remove();
+  bg.innerHTML = `<span class="media-viewer-close">✕</span>${isVideo ? `<video src="${url}" controls playsinline autoplay style="max-width:95vw;max-height:90vh;border-radius:12px"></video>` : `<img src="${url}" style="max-width:95vw;max-height:90vh;border-radius:12px">`}`;
+  document.body.appendChild(bg);
+}
+
 function closeActionMenu() {
   document.getElementById('action-menu-bg')?.remove();
   document.getElementById('action-menu')?.remove();
@@ -422,13 +435,31 @@ async function toggle(id) {
   } catch(e) { item.done = !newDone; item.achieved_at = null; render(); showError('更新失敗: ' + e.message); }
 }
 
-function startEdit(id) { editingId = id; render(); const inp = document.getElementById(`edit-input-${id}`); if (inp) { inp.focus(); inp.select(); } }
+function startEdit(id) {
+  const item = items.find(i => i.id === id);
+  if (!item) return;
+  editingId = id; editingCat = item.cat || 'other'; editingWith = item.with_who || null;
+  render();
+  const inp = document.getElementById(`edit-input-${id}`); if (inp) { inp.focus(); inp.select(); }
+}
+function selectEditCat(val) {
+  editingCat = val;
+  ['travel','experience','food','learn','other'].forEach(k => {
+    const el = document.getElementById(`ecat-${editingId}-${k}`);
+    if (el) { el.className = 'cat-pill'; if (k === val) el.classList.add('sel-' + k); }
+  });
+}
+function selectEditWith(val) {
+  editingWith = editingWith === val ? null : val;
+  ['solo','friends','partner','anyone'].forEach(k => {
+    const el = document.getElementById(`ewith-${editingId}-${k}`);
+    if (el) el.classList.toggle('selected', k === editingWith);
+  });
+}
 function cancelEdit() { editingId = null; render(); }
 
 async function saveEdit(id) {
   const input = document.getElementById(`edit-input-${id}`);
-  const catSel = document.getElementById(`edit-cat-${id}`);
-  const withSel = document.getElementById(`edit-with-${id}`);
   if (!input) return;
   const text = input.value.trim();
   if (!text) return;
@@ -436,8 +467,8 @@ async function saveEdit(id) {
   if (!item) return;
   const oldText = item.text, oldCat = item.cat, oldWith = item.with_who;
   item.text = text;
-  if (catSel) item.cat = catSel.value;
-  if (withSel) item.with_who = withSel.value || null;
+  if (editingCat) item.cat = editingCat;
+  item.with_who = editingWith || null;
   editingId = null; render();
   try {
     const res = await fetch(`${API}?id=eq.${id}`, { method: 'PATCH', headers: H, body: JSON.stringify({ text, cat: item.cat, with_who: item.with_who }) });
@@ -499,7 +530,6 @@ function render() {
 
   el.innerHTML = visible.map(item => {
     const isVideo = item.image_url && (item.image_url.includes('.mp4')||item.image_url.includes('.mov')||item.image_url.includes('.webm'));
-    const mediaHtml = item.image_url ? `<div class="item-image">${isVideo?`<video src="${item.image_url}" controls playsinline></video>`:`<img src="${item.image_url}" alt="達成の記録" loading="lazy">`}</div>` : '';
     const overdue = !item.done && isOverdue(item.deadline);
     const isEditing = editingId === item.id;
 
@@ -511,21 +541,11 @@ function render() {
         <div class="item-body">
           ${isEditing ? `
             <input class="item-edit-input" id="edit-input-${item.id}" value="${item.text.replace(/"/g,'&quot;')}" onkeydown="if(event.key==='Enter')saveEdit(${item.id});if(event.key==='Escape')cancelEdit()">
-            <div class="item-edit-row">
-              <select id="edit-cat-${item.id}">
-                <option value="travel" ${item.cat==='travel'?'selected':''}>旅行</option>
-                <option value="experience" ${item.cat==='experience'?'selected':''}>体験</option>
-                <option value="food" ${item.cat==='food'?'selected':''}>食・グルメ</option>
-                <option value="learn" ${item.cat==='learn'?'selected':''}>学び・成長</option>
-                <option value="other" ${item.cat==='other'?'selected':''}>その他</option>
-              </select>
-              <select id="edit-with-${item.id}">
-                <option value="" ${!item.with_who?'selected':''}>誰と？</option>
-                <option value="solo" ${item.with_who==='solo'?'selected':''}>1人で</option>
-                <option value="friends" ${item.with_who==='friends'?'selected':''}>友達と</option>
-                <option value="partner" ${item.with_who==='partner'?'selected':''}>恋人と</option>
-                <option value="anyone" ${item.with_who==='anyone'?'selected':''}>誰でも</option>
-              </select>
+            <div class="cat-pills" style="margin:8px 0 4px">
+              ${['travel','experience','food','learn','other'].map(k=>`<button type="button" class="cat-pill${editingCat===k?' sel-'+k:''}" id="ecat-${item.id}-${k}" onclick="selectEditCat('${k}')">${catLabel[k]}</button>`).join('')}
+            </div>
+            <div class="with-pills" style="margin:4px 0 8px">
+              ${['solo','friends','partner','anyone'].map(k=>`<button type="button" class="with-pill${editingWith===k?' selected':''}" id="ewith-${item.id}-${k}" onclick="selectEditWith('${k}')">${withLabel[k]}</button>`).join('')}
             </div>
             <div class="item-edit-actions">
               <button class="edit-save-btn" onclick="saveEdit(${item.id})">保存</button>
@@ -538,13 +558,13 @@ function render() {
             ${item.deadline ? `<span class="deadline-badge${overdue?' overdue':''}">📅 ${formatDate(item.deadline)}${overdue?' 期限切れ':''}</span>` : ''}
             ${item.achieved_at ? `<span class="achieved-badge">✓ ${formatDate(item.achieved_at)} 達成</span>` : ''}
           </div>
-          ${mediaHtml}
-          ${isEditing && !item.image_url ? `
-            <label class="upload-btn" for="file-${item.id}">📷 写真・動画を追加</label>
+          ${isEditing ? `
+            <label class="upload-btn" for="file-${item.id}">📷 ${item.image_url ? '写真・動画を変更' : '写真・動画を追加'}</label>
             <input class="file-input" type="file" id="file-${item.id}" accept="image/*,video/*" onchange="uploadMedia(${item.id}, this.files[0])">
             <span class="uploading" id="upload-status-${item.id}"></span>
           ` : ''}
         </div>
+        ${item.image_url && !isEditing ? `<div class="item-thumb" onclick="openMediaViewer('${item.image_url}',${isVideo})">${isVideo?`<video src="${item.image_url}" style="width:64px;height:64px;object-fit:cover;border-radius:8px" playsinline muted></video>`:`<img src="${item.image_url}" style="width:64px;height:64px;object-fit:cover;border-radius:8px">`}</div>` : ''}
         <button style="background:transparent;border:none;color:#bbb;font-size:20px;cursor:pointer;padding:2px 8px;flex-shrink:0;line-height:1" onclick="openActionMenu(${item.id},this)">⋯</button>
       </div>
     </div>`;
