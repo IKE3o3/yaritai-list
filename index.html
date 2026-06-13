@@ -39,6 +39,20 @@
     .confirm-del { padding: 12px; border-radius: 12px; border: none; background: #e74c3c; color: #fff; font-size: 15px; font-weight: 600; cursor: pointer; }
     .confirm-cancel { padding: 12px; border-radius: 12px; border: none; background: #f0f0f0; color: #555; font-size: 15px; cursor: pointer; }
 
+    .action-menu-bg { position: fixed; inset: 0; z-index: 150; }
+    .action-menu { position: absolute; background: #fff; border-radius: 14px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); padding: 6px; min-width: 140px; z-index: 160; }
+    .action-menu button { display: block; width: 100%; text-align: left; padding: 10px 14px; font-size: 14px; border: none; background: transparent; cursor: pointer; border-radius: 8px; }
+    .action-menu button:hover { background: #f5f5f5; }
+    .action-menu .action-del { color: #e74c3c; }
+
+    .cat-pills { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+    .cat-pill { padding: 6px 14px; border-radius: 99px; border: 1.5px solid #e0e0e0; background: #fff; color: #666; font-size: 13px; cursor: pointer; transition: all .15s; }
+    .cat-pill.sel-travel  { border-color: #1D9E75; background: #E1F5EE; color: #0F6E56; font-weight: 600; }
+    .cat-pill.sel-experience { border-color: #D85A30; background: #FAECE7; color: #993C1D; font-weight: 600; }
+    .cat-pill.sel-food    { border-color: #BA7517; background: #FAEEDA; color: #854F0B; font-weight: 600; }
+    .cat-pill.sel-learn   { border-color: #534AB7; background: #EEEDFE; color: #3C3489; font-weight: 600; }
+    .cat-pill.sel-other   { border-color: #888780; background: #F1EFE8; color: #5F5E5A; font-weight: 600; }
+
     .confetti-wrap { position: fixed; inset: 0; pointer-events: none; z-index: 200; overflow: hidden; }
     .confetti-piece { position: absolute; width: 8px; height: 8px; border-radius: 2px; animation: fall linear forwards; }
     @keyframes fall { to { transform: translateY(110vh) rotate(720deg); opacity: 0; } }
@@ -207,6 +221,14 @@
   <div class="sheet-handle"></div>
   <div class="add-card">
     <input id="new-item" type="text" placeholder="やりたいことを入力..." onkeydown="if(event.key==='Enter')addItem()">
+    <div class="with-label">カテゴリ</div>
+    <div class="cat-pills">
+      <button type="button" class="cat-pill" onclick="selectCat('travel')" id="cat-travel">旅行</button>
+      <button type="button" class="cat-pill" onclick="selectCat('experience')" id="cat-experience">体験</button>
+      <button type="button" class="cat-pill" onclick="selectCat('food')" id="cat-food">食・グルメ</button>
+      <button type="button" class="cat-pill" onclick="selectCat('learn')" id="cat-learn">学び・成長</button>
+      <button type="button" class="cat-pill" onclick="selectCat('other')" id="cat-other">その他</button>
+    </div>
     <div class="with-label">誰と？</div>
     <div class="with-pills">
       <button type="button" class="with-pill" onclick="selectWith('solo')" id="with-solo">1人で</button>
@@ -215,14 +237,7 @@
       <button type="button" class="with-pill" onclick="selectWith('anyone')" id="with-anyone">誰でも</button>
     </div>
     <div class="add-row">
-      <select id="new-cat">
-        <option value="travel">旅行</option>
-        <option value="experience">体験</option>
-        <option value="food">食・グルメ</option>
-        <option value="learn">学び・成長</option>
-        <option value="other">その他</option>
-      </select>
-      <input type="date" id="new-deadline" title="期限">
+      <input type="date" id="new-deadline" title="期限" style="width:100%">
     </div>
     <div class="add-row2">
       <button class="add-btn" onclick="addItem()" style="width:100%">＋ 追加</button>
@@ -254,7 +269,7 @@ const catClass = { travel: 'cat-travel', experience: 'cat-experience', food: 'ca
 const withLabel = { solo: '1人で', friends: '友達と', partner: '恋人と', anyone: '誰でも' };
 
 let items = [], filter = 'all', editingId = null, prevDoneCount = 0;
-let longPressTimer = null, pendingDeleteId = null, selectedWith = null;
+let pendingDeleteId = null, selectedWith = null, selectedCat = 'travel';
 
 function openSheet() {
   document.getElementById('sheet-bg').style.display = 'block';
@@ -266,6 +281,14 @@ function closeSheet() {
   document.getElementById('add-sheet').style.display = 'none';
 }
 
+function selectCat(val) {
+  selectedCat = val;
+  ['travel','experience','food','learn','other'].forEach(k => {
+    const el = document.getElementById('cat-' + k);
+    if (el) { el.className = 'cat-pill'; if (k === val) el.classList.add('sel-' + k); }
+  });
+}
+
 function selectWith(val) {
   selectedWith = selectedWith === val ? null : val;
   ['solo','friends','partner','anyone'].forEach(k => {
@@ -274,8 +297,29 @@ function selectWith(val) {
   });
 }
 
-function startLongPress(id) { longPressTimer = setTimeout(() => startEdit(id), 600); }
-function cancelLongPress() { clearTimeout(longPressTimer); }
+function openActionMenu(id, btnEl) {
+  closeActionMenu();
+  const item = items.find(i => i.id === id);
+  if (!item) return;
+  const rect = btnEl.getBoundingClientRect();
+  const bg = document.createElement('div');
+  bg.className = 'action-menu-bg';
+  bg.id = 'action-menu-bg';
+  bg.onclick = closeActionMenu;
+  const menu = document.createElement('div');
+  menu.className = 'action-menu';
+  menu.id = 'action-menu';
+  menu.style.cssText = `position:fixed;top:${rect.bottom + 4}px;right:${window.innerWidth - rect.right}px`;
+  menu.innerHTML = `
+    <button onclick="closeActionMenu();startEdit(${id})">✏️ 編集</button>
+    <button class="action-del" onclick="closeActionMenu();askDelete(${id})">🗑️ 削除</button>`;
+  document.body.appendChild(bg);
+  document.body.appendChild(menu);
+}
+function closeActionMenu() {
+  document.getElementById('action-menu-bg')?.remove();
+  document.getElementById('action-menu')?.remove();
+}
 
 function showError(msg) { const el = document.getElementById('error-banner'); el.textContent = msg; el.style.display = msg ? 'block' : 'none'; }
 function formatDate(d) { if (!d) return ''; const dt = new Date(d); return `${dt.getFullYear()}/${dt.getMonth()+1}/${dt.getDate()}`; }
@@ -340,7 +384,7 @@ async function loadItems() {
 
 async function addItem() {
   const inp = document.getElementById('new-item');
-  const cat = document.getElementById('new-cat').value;
+  const cat = selectedCat || 'other';
   const withWho = selectedWith || null;
   const deadline = document.getElementById('new-deadline').value || null;
   const text = inp.value.trim();
@@ -459,9 +503,7 @@ function render() {
     const overdue = !item.done && isOverdue(item.deadline);
     const isEditing = editingId === item.id;
 
-    return `<div class="item${item.done?' done':''}"
-      oncontextmenu="startEdit(${item.id});return false;"
-      ontouchstart="startLongPress(${item.id})" ontouchend="cancelLongPress()" ontouchmove="cancelLongPress()">
+    return `<div class="item${item.done?' done':''}">`
       <div class="item-top">
         <button class="check-btn${item.done?' checked':''}" onclick="toggle(${item.id})">
           <svg class="check-icon" viewBox="0 0 13 13"><polyline points="1.5,6.5 5,10 11,2.5"/></svg>
@@ -503,13 +545,14 @@ function render() {
             <span class="uploading" id="upload-status-${item.id}"></span>
           ` : ''}
         </div>
-        <button style="background:transparent;border:none;color:#ddd;font-size:18px;cursor:pointer;padding:2px 4px;flex-shrink:0" onclick="askDelete(${item.id})">⋯</button>
+        <button style="background:transparent;border:none;color:#bbb;font-size:20px;cursor:pointer;padding:2px 8px;flex-shrink:0;line-height:1" onclick="openActionMenu(${item.id},this)">⋯</button>
       </div>
     </div>`;
   }).join('');
 }
 
 loadItems();
+selectCat('travel');
 
 async function ensureWithWhoColumn() {
   await fetch(`${API}?id=eq.-1`, { method: 'PATCH', headers: H, body: JSON.stringify({}) }).catch(()=>{});
