@@ -12,11 +12,11 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', sans-serif; background: #f0f4f0; min-height: 100vh; color: #1a1a1a; }
 
-    .header { background: #1D9E75; padding: 1.5rem 1rem 3rem; text-align: center; }
+    .header { background: #1D9E75; padding: 1.5rem 1rem 1rem; text-align: center; }
     .header h1 { font-size: 22px; font-weight: 700; color: #fff; letter-spacing: 0.02em; }
     .header .subtitle { font-size: 13px; color: rgba(255,255,255,0.75); margin-top: 4px; }
 
-    .badge-bar { background: #1D9E75; padding: 0 1rem 1rem; display: flex; justify-content: center; }
+    .badge-bar { background: #1D9E75; padding: 0.5rem 1rem 2rem; display: flex; justify-content: center; }
     .badge-pill { background: rgba(255,255,255,0.2); border-radius: 99px; padding: 6px 16px; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: #fff; font-weight: 600; cursor: pointer; border: none; }
 
     .badge-modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 1rem; }
@@ -83,6 +83,10 @@
     .add-card input[type=text]:focus { outline: none; border-color: #1D9E75; background: #fff; }
     .add-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
     .add-row2 { display: flex; gap: 8px; flex-wrap: wrap; }
+    .with-label { font-size: 12px; color: #999; margin-bottom: 6px; }
+    .with-pills { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+    .with-pill { padding: 6px 14px; border-radius: 99px; border: 1.5px solid #e0e0e0; background: #fff; color: #666; font-size: 13px; cursor: pointer; transition: all .15s; }
+    .with-pill.selected { border-color: #1D9E75; background: #E1F5EE; color: #0F6E56; font-weight: 600; }
     .add-card select { flex: 1; min-width: 100px; font-size: 13px; padding: 9px 10px; border-radius: 10px; border: 1.5px solid #e0e0e0; background: #fafafa; }
     .add-card input[type=date] { flex: 1; min-width: 120px; font-size: 13px; padding: 9px 10px; border-radius: 10px; border: 1.5px solid #e0e0e0; background: #fafafa; color: #444; }
     .add-btn { padding: 9px 20px; border-radius: 10px; border: none; background: #1D9E75; color: #fff; font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; }
@@ -169,6 +173,13 @@
 
   <div class="add-card">
     <input id="new-item" type="text" placeholder="やりたいことを入力..." onkeydown="if(event.key==='Enter')addItem()">
+    <div class="with-label">誰と？</div>
+    <div class="with-pills">
+      <button type="button" class="with-pill" onclick="selectWith('solo')" id="with-solo">1人で</button>
+      <button type="button" class="with-pill" onclick="selectWith('friends')" id="with-friends">友達と</button>
+      <button type="button" class="with-pill" onclick="selectWith('partner')" id="with-partner">恋人と</button>
+      <button type="button" class="with-pill" onclick="selectWith('anyone')" id="with-anyone">誰でも</button>
+    </div>
     <div class="add-row">
       <select id="new-cat">
         <option value="travel">旅行</option>
@@ -176,13 +187,6 @@
         <option value="food">食・グルメ</option>
         <option value="learn">学び・成長</option>
         <option value="other">その他</option>
-      </select>
-      <select id="new-with">
-        <option value="">誰と？</option>
-        <option value="solo">1人で</option>
-        <option value="friends">友達と</option>
-        <option value="partner">恋人と</option>
-        <option value="anyone">誰でも</option>
       </select>
       <input type="date" id="new-deadline" title="期限">
     </div>
@@ -238,7 +242,15 @@ const catClass = { travel: 'cat-travel', experience: 'cat-experience', food: 'ca
 const withLabel = { solo: '1人で', friends: '友達と', partner: '恋人と', anyone: '誰でも' };
 
 let items = [], filter = 'all', editingId = null, prevDoneCount = 0;
-let longPressTimer = null, pendingDeleteId = null;
+let longPressTimer = null, pendingDeleteId = null, selectedWith = null;
+
+function selectWith(val) {
+  selectedWith = selectedWith === val ? null : val;
+  ['solo','friends','partner','anyone'].forEach(k => {
+    const el = document.getElementById('with-' + k);
+    if (el) el.classList.toggle('selected', k === selectedWith);
+  });
+}
 
 function startLongPress(id) { longPressTimer = setTimeout(() => startEdit(id), 600); }
 function cancelLongPress() { clearTimeout(longPressTimer); }
@@ -307,7 +319,7 @@ async function loadItems() {
 async function addItem() {
   const inp = document.getElementById('new-item');
   const cat = document.getElementById('new-cat').value;
-  const withWho = document.getElementById('new-with').value || null;
+  const withWho = selectedWith || null;
   const deadline = document.getElementById('new-deadline').value || null;
   const text = inp.value.trim();
   if (!text) return;
@@ -317,6 +329,8 @@ async function addItem() {
     if (!res.ok) throw new Error(await res.text());
     const [item] = await res.json();
     items.push(item);
+    selectedWith = null;
+    ['solo','friends','partner','anyone'].forEach(k => { const el = document.getElementById('with-'+k); if(el) el.classList.remove('selected'); });
     render(); showError('');
   } catch(e) { showError('追加失敗: ' + e.message); inp.value = text; }
 }
