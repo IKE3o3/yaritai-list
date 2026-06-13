@@ -16,6 +16,33 @@
     .header h1 { font-size: 22px; font-weight: 700; color: #fff; letter-spacing: 0.02em; }
     .header .subtitle { font-size: 13px; color: rgba(255,255,255,0.75); margin-top: 4px; }
 
+    .badge-bar { background: #1D9E75; padding: 0 1rem 1rem; display: flex; justify-content: center; }
+    .badge-pill { background: rgba(255,255,255,0.2); border-radius: 99px; padding: 6px 16px; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: #fff; font-weight: 600; cursor: pointer; border: none; }
+
+    .badge-modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 1rem; }
+    .badge-modal { background: #fff; border-radius: 20px; padding: 1.5rem; width: 100%; max-width: 360px; max-height: 80vh; overflow-y: auto; }
+    .badge-modal h2 { font-size: 18px; font-weight: 700; margin-bottom: 1rem; text-align: center; }
+    .badge-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .badge-item { text-align: center; padding: 12px 8px; border-radius: 14px; border: 2px solid #eee; }
+    .badge-item.unlocked { border-color: #1D9E75; background: #f0fff8; }
+    .badge-item.locked { opacity: 0.4; filter: grayscale(1); }
+    .badge-icon { font-size: 28px; display: block; }
+    .badge-name { font-size: 11px; font-weight: 600; margin-top: 4px; color: #333; }
+    .badge-req { font-size: 10px; color: #999; margin-top: 2px; }
+    .modal-close { width: 100%; margin-top: 1rem; padding: 10px; border-radius: 10px; border: none; background: #f0f0f0; font-size: 14px; cursor: pointer; }
+
+    .confirm-modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; display: flex; align-items: flex-end; justify-content: center; padding: 1rem; }
+    .confirm-modal { background: #fff; border-radius: 20px; padding: 1.5rem; width: 100%; max-width: 400px; }
+    .confirm-modal p { font-size: 15px; text-align: center; margin-bottom: 1rem; color: #333; }
+    .confirm-modal .confirm-text { font-weight: 600; color: #1a1a1a; }
+    .confirm-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .confirm-del { padding: 12px; border-radius: 12px; border: none; background: #e74c3c; color: #fff; font-size: 15px; font-weight: 600; cursor: pointer; }
+    .confirm-cancel { padding: 12px; border-radius: 12px; border: none; background: #f0f0f0; color: #555; font-size: 15px; cursor: pointer; }
+
+    .confetti-wrap { position: fixed; inset: 0; pointer-events: none; z-index: 200; overflow: hidden; }
+    .confetti-piece { position: absolute; width: 8px; height: 8px; border-radius: 2px; animation: fall linear forwards; }
+    @keyframes fall { to { transform: translateY(110vh) rotate(720deg); opacity: 0; } }
+
     .stats-wrap { max-width: 640px; margin: -1.5rem auto 0; padding: 0 1rem; }
     .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
     .stat { background: #fff; border-radius: 14px; padding: 1rem; text-align: center; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
@@ -28,19 +55,37 @@
 
     .container { max-width: 640px; margin: 0 auto; padding: 1.25rem 1rem 5rem; }
 
+    .search-wrap { margin-bottom: 1rem; position: relative; }
+    .search-wrap input { width: 100%; font-size: 14px; padding: 10px 14px 10px 38px; border-radius: 12px; border: 1.5px solid #e0e0e0; background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+    .search-wrap input:focus { outline: none; border-color: #1D9E75; }
+    .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 16px; pointer-events: none; }
+
     .tabs { display: flex; gap: 6px; margin-bottom: 1rem; overflow-x: auto; padding-bottom: 2px; -webkit-overflow-scrolling: touch; }
     .tabs::-webkit-scrollbar { display: none; }
-    .tab { padding: 7px 14px; border-radius: 99px; border: 1.5px solid #ddd; background: #fff; color: #666; font-size: 13px; cursor: pointer; white-space: nowrap; transition: all .15s; flex-shrink: 0; }
-    .tab.active { background: #1D9E75; border-color: #1D9E75; color: #fff; font-weight: 600; }
+    .tab { padding: 7px 14px; border-radius: 99px; border: 1.5px solid #ddd; background: #fff; color: #666; font-size: 13px; cursor: pointer; white-space: nowrap; transition: all .15s; flex-shrink: 0; font-weight: 500; }
+    .tab.active { color: #fff; font-weight: 600; }
+    .tab-all.active    { background: #1a1a1a; border-color: #1a1a1a; }
+    .tab-travel.active    { background: #1D9E75; border-color: #1D9E75; }
+    .tab-experience.active { background: #D85A30; border-color: #D85A30; }
+    .tab-food.active   { background: #BA7517; border-color: #BA7517; }
+    .tab-learn.active  { background: #534AB7; border-color: #534AB7; }
+    .tab-other.active  { background: #888780; border-color: #888780; }
+    .tab-done.active   { background: #444; border-color: #444; }
+    .tab-travel    { border-color: #9FE1CB; color: #0F6E56; }
+    .tab-experience { border-color: #F5C4B3; color: #993C1D; }
+    .tab-food      { border-color: #FAC775; color: #854F0B; }
+    .tab-learn     { border-color: #AFA9EC; color: #3C3489; }
+    .tab-other     { border-color: #D3D1C7; color: #5F5E5A; }
+    .tab-done      { border-color: #ccc; color: #555; }
 
     .add-card { background: #fff; border-radius: 16px; padding: 1.25rem; margin-bottom: 1.25rem; box-shadow: 0 2px 12px rgba(0,0,0,0.07); }
     .add-card input[type=text] { width: 100%; font-size: 15px; padding: 10px 14px; border-radius: 10px; border: 1.5px solid #e0e0e0; background: #fafafa; margin-bottom: 10px; }
     .add-card input[type=text]:focus { outline: none; border-color: #1D9E75; background: #fff; }
-    .add-row { display: flex; gap: 8px; flex-wrap: wrap; }
+    .add-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+    .add-row2 { display: flex; gap: 8px; flex-wrap: wrap; }
     .add-card select { flex: 1; min-width: 100px; font-size: 13px; padding: 9px 10px; border-radius: 10px; border: 1.5px solid #e0e0e0; background: #fafafa; }
     .add-card input[type=date] { flex: 1; min-width: 120px; font-size: 13px; padding: 9px 10px; border-radius: 10px; border: 1.5px solid #e0e0e0; background: #fafafa; color: #444; }
     .add-btn { padding: 9px 20px; border-radius: 10px; border: none; background: #1D9E75; color: #fff; font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; }
-    .add-btn:active { opacity: 0.85; }
 
     .items { display: flex; flex-direction: column; gap: 10px; }
     .item { background: #fff; border-radius: 16px; padding: 1rem 1.1rem; box-shadow: 0 2px 10px rgba(0,0,0,0.06); overflow: hidden; transition: opacity .2s; }
@@ -53,23 +98,28 @@
     .item-body { flex: 1; min-width: 0; }
     .item-text { font-size: 15px; line-height: 1.4; word-break: break-all; }
     .item.done .item-text { text-decoration: line-through; color: #aaa; }
-    .item-meta { display: flex; align-items: center; gap: 8px; margin-top: 6px; flex-wrap: wrap; }
+    .item-edit-input { width: 100%; font-size: 15px; padding: 6px 10px; border-radius: 8px; border: 1.5px solid #1D9E75; background: #f0fff8; margin-bottom: 6px; }
+    .item-edit-row { display: flex; gap: 6px; margin-bottom: 6px; flex-wrap: wrap; }
+    .item-edit-row select { flex: 1; font-size: 13px; padding: 6px 8px; border-radius: 8px; border: 1.5px solid #e0e0e0; background: #fafafa; min-width: 100px; }
+    .item-edit-actions { display: flex; gap: 6px; }
+    .edit-save-btn { font-size: 13px; padding: 6px 14px; border-radius: 8px; border: none; background: #1D9E75; color: #fff; cursor: pointer; font-weight: 600; }
+    .edit-cancel-btn { font-size: 13px; padding: 6px 14px; border-radius: 8px; border: 1px solid #ddd; background: #fff; color: #666; cursor: pointer; }
+    .item-meta { display: flex; align-items: center; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
     .cat-badge { font-size: 11px; padding: 3px 9px; border-radius: 99px; font-weight: 600; }
-    .cat-travel { background: #E1F5EE; color: #0F6E56; }
-    .cat-hobby { background: #EEEDFE; color: #3C3489; }
-    .cat-career { background: #E6F1FB; color: #0C447C; }
-    .deadline-badge { font-size: 11px; color: #888; display: flex; align-items: center; gap: 3px; }
+    .cat-travel     { background: #E1F5EE; color: #0F6E56; }
+    .cat-experience { background: #FAECE7; color: #993C1D; }
+    .cat-food       { background: #FAEEDA; color: #854F0B; }
+    .cat-learn      { background: #EEEDFE; color: #3C3489; }
+    .cat-other      { background: #F1EFE8; color: #5F5E5A; }
+    .with-badge { font-size: 11px; padding: 3px 9px; border-radius: 99px; background: #f5f5f5; color: #666; font-weight: 500; }
+    .deadline-badge { font-size: 11px; color: #888; }
     .deadline-badge.overdue { color: #e05; }
     .achieved-badge { font-size: 11px; color: #1D9E75; }
-    .del-btn { background: transparent; border: none; color: #ccc; cursor: pointer; font-size: 20px; line-height: 1; flex-shrink: 0; padding: 2px 4px; }
-    .del-btn:hover { color: #999; }
 
-    .item-image { margin-top: 10px; border-radius: 10px; overflow: hidden; position: relative; }
+    .item-image { margin-top: 10px; border-radius: 10px; overflow: hidden; }
     .item-image img { width: 100%; max-height: 200px; object-fit: cover; display: block; }
-    .item-image video { width: 100%; max-height: 200px; object-fit: cover; display: block; border-radius: 10px; }
-
+    .item-image video { width: 100%; max-height: 200px; object-fit: cover; display: block; }
     .upload-btn { margin-top: 8px; display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: #1D9E75; cursor: pointer; background: #E1F5EE; padding: 5px 12px; border-radius: 99px; border: none; }
-    .upload-btn:active { opacity: 0.8; }
     .file-input { display: none; }
     .uploading { font-size: 12px; color: #999; margin-top: 6px; }
 
@@ -84,6 +134,9 @@
   <h1>✦ やりたいことリスト</h1>
   <p class="subtitle" id="subtitle">さあ、夢を書き出そう</p>
 </div>
+<div class="badge-bar">
+  <button class="badge-pill" onclick="openBadgeModal()" id="current-badge">🌱 はじめの一歩  ›</button>
+</div>
 
 <div class="stats-wrap">
   <div class="stats">
@@ -92,7 +145,6 @@
     <div class="stat"><div class="stat-num" id="stat-pct">0%</div><div class="stat-label">達成率</div></div>
   </div>
 </div>
-
 <div class="progress-bar-wrap">
   <div class="progress-bar-bg"><div class="progress-bar-fill" id="progress-fill" style="width:0%"></div></div>
 </div>
@@ -100,62 +152,146 @@
 <div class="container">
   <div id="error-banner" class="error-banner" style="display:none"></div>
 
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="search-input" placeholder="やりたいことを検索..." oninput="render()">
+  </div>
+
   <div class="tabs">
-    <button class="tab active" onclick="setFilter('all')">すべて</button>
-    <button class="tab" onclick="setFilter('travel')">✈️ 旅行</button>
-    <button class="tab" onclick="setFilter('hobby')">🎨 趣味・スキル</button>
-    <button class="tab" onclick="setFilter('career')">💼 仕事・キャリア</button>
-    <button class="tab" onclick="setFilter('done')">✅ 達成済み</button>
+    <button class="tab tab-all active" onclick="setFilter('all')">すべて</button>
+    <button class="tab tab-travel" onclick="setFilter('travel')">旅行</button>
+    <button class="tab tab-experience" onclick="setFilter('experience')">体験</button>
+    <button class="tab tab-food" onclick="setFilter('food')">食・グルメ</button>
+    <button class="tab tab-learn" onclick="setFilter('learn')">学び・成長</button>
+    <button class="tab tab-other" onclick="setFilter('other')">その他</button>
+    <button class="tab tab-done" onclick="setFilter('done')">達成済み</button>
   </div>
 
   <div class="add-card">
     <input id="new-item" type="text" placeholder="やりたいことを入力..." onkeydown="if(event.key==='Enter')addItem()">
     <div class="add-row">
       <select id="new-cat">
-        <option value="travel">✈️ 旅行</option>
-        <option value="hobby">🎨 趣味・スキル</option>
-        <option value="career">💼 仕事・キャリア</option>
+        <option value="travel">旅行</option>
+        <option value="experience">体験</option>
+        <option value="food">食・グルメ</option>
+        <option value="learn">学び・成長</option>
+        <option value="other">その他</option>
+      </select>
+      <select id="new-with">
+        <option value="">誰と？</option>
+        <option value="solo">1人で</option>
+        <option value="friends">友達と</option>
+        <option value="partner">恋人と</option>
+        <option value="anyone">誰でも</option>
       </select>
       <input type="date" id="new-deadline" title="期限">
-      <button class="add-btn" onclick="addItem()">＋ 追加</button>
+    </div>
+    <div class="add-row2">
+      <button class="add-btn" onclick="addItem()" style="width:100%">＋ 追加</button>
     </div>
   </div>
 
   <div id="items-list" class="items"><div class="empty"><span class="empty-icon">📝</span>読み込み中...</div></div>
 </div>
 
+<div class="confetti-wrap" id="confetti-wrap"></div>
+
+<div id="badge-modal-bg" class="badge-modal-bg" style="display:none" onclick="if(event.target===this)closeBadgeModal()">
+  <div class="badge-modal">
+    <h2>🏅 バッジコレクション</h2>
+    <div class="badge-grid" id="badge-grid"></div>
+    <button class="modal-close" onclick="closeBadgeModal()">閉じる</button>
+  </div>
+</div>
+
+<div id="confirm-modal-bg" class="confirm-modal-bg" style="display:none">
+  <div class="confirm-modal">
+    <p>「<span class="confirm-text" id="confirm-item-text"></span>」を削除しますか？</p>
+    <div class="confirm-btns">
+      <button class="confirm-cancel" onclick="closeConfirm()">キャンセル</button>
+      <button class="confirm-del" onclick="confirmDelete()">削除</button>
+    </div>
+  </div>
+</div>
+
 <script>
 const SUPABASE_URL = 'https://fbqxmjcgicsgzhxnntgw.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZicXhtamNnaWNzZ3poeG5udGd3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzNDg3MzIsImV4cCI6MjA5NjkyNDczMn0.t5b3yObOhm2cdYULIyfkxPxjQplu-rEH-LENjT-t3Jg';
-
 const API = `${SUPABASE_URL}/rest/v1/bucket_list`;
 const STORAGE = `${SUPABASE_URL}/storage/v1`;
-const H = {
-  'apikey': SUPABASE_ANON_KEY,
-  'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-  'Content-Type': 'application/json',
-  'Prefer': 'return=representation'
-};
+const H = { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' };
 
-let items = [], filter = 'all';
+const BADGES = [
+  { icon: '🌱', name: 'はじめの一歩', req: 0, label: 'スタート' },
+  { icon: '⭐', name: '初達成', req: 1, label: '1個達成' },
+  { icon: '🔥', name: '波に乗れ', req: 3, label: '3個達成' },
+  { icon: '💪', name: 'チャレンジャー', req: 5, label: '5個達成' },
+  { icon: '🎯', name: '10本ノック', req: 10, label: '10個達成' },
+  { icon: '🚀', name: 'ドリーマー', req: 20, label: '20個達成' },
+  { icon: '👑', name: 'レジェンド', req: 50, label: '50個達成' },
+  { icon: '🌟', name: 'マスター', req: 100, label: '100個達成' },
+  { icon: '🏆', name: 'ゴッド', req: 200, label: '200個達成' },
+];
 
-const catLabel = { travel: '✈️ 旅行', hobby: '🎨 趣味・スキル', career: '💼 仕事・キャリア' };
-const catClass = { travel: 'cat-travel', hobby: 'cat-hobby', career: 'cat-career' };
+const catLabel = { travel: '旅行', experience: '体験', food: '食・グルメ', learn: '学び・成長', other: 'その他' };
+const catClass = { travel: 'cat-travel', experience: 'cat-experience', food: 'cat-food', learn: 'cat-learn', other: 'cat-other' };
+const withLabel = { solo: '1人で', friends: '友達と', partner: '恋人と', anyone: '誰でも' };
 
-function showError(msg) {
-  const el = document.getElementById('error-banner');
-  el.textContent = msg; el.style.display = msg ? 'block' : 'none';
+let items = [], filter = 'all', editingId = null, prevDoneCount = 0;
+let longPressTimer = null, pendingDeleteId = null;
+
+function startLongPress(id) { longPressTimer = setTimeout(() => startEdit(id), 600); }
+function cancelLongPress() { clearTimeout(longPressTimer); }
+
+function showError(msg) { const el = document.getElementById('error-banner'); el.textContent = msg; el.style.display = msg ? 'block' : 'none'; }
+function formatDate(d) { if (!d) return ''; const dt = new Date(d); return `${dt.getFullYear()}/${dt.getMonth()+1}/${dt.getDate()}`; }
+function isOverdue(deadline) { if (!deadline) return false; return new Date(deadline) < new Date(); }
+
+function getCurrentBadge(n) { let b = BADGES[0]; for (const x of BADGES) { if (n >= x.req) b = x; } return b; }
+
+function launchConfetti() {
+  const wrap = document.getElementById('confetti-wrap');
+  wrap.innerHTML = '';
+  const colors = ['#1D9E75','#5DCAA5','#FFD700','#FF6B6B','#7C3AED','#F59E0B'];
+  for (let i = 0; i < 60; i++) {
+    const el = document.createElement('div');
+    el.className = 'confetti-piece';
+    el.style.cssText = `left:${Math.random()*100}%;top:-10px;background:${colors[Math.floor(Math.random()*colors.length)]};animation-duration:${1+Math.random()*1.5}s;animation-delay:${Math.random()*0.5}s`;
+    wrap.appendChild(el);
+  }
+  setTimeout(() => wrap.innerHTML = '', 3000);
 }
 
-function formatDate(d) {
-  if (!d) return '';
-  const dt = new Date(d);
-  return `${dt.getFullYear()}/${dt.getMonth()+1}/${dt.getDate()}`;
+function openBadgeModal() {
+  const done = items.filter(i => i.done).length;
+  document.getElementById('badge-grid').innerHTML = BADGES.map(b => `
+    <div class="badge-item ${done >= b.req ? 'unlocked' : 'locked'}">
+      <span class="badge-icon">${b.icon}</span>
+      <div class="badge-name">${b.name}</div>
+      <div class="badge-req">${b.label}</div>
+    </div>`).join('');
+  document.getElementById('badge-modal-bg').style.display = 'flex';
 }
+function closeBadgeModal() { document.getElementById('badge-modal-bg').style.display = 'none'; }
 
-function isOverdue(deadline) {
-  if (!deadline) return false;
-  return new Date(deadline) < new Date();
+function askDelete(id) {
+  const item = items.find(i => i.id === id);
+  if (!item) return;
+  pendingDeleteId = id;
+  document.getElementById('confirm-item-text').textContent = item.text.length > 20 ? item.text.slice(0,20) + '…' : item.text;
+  document.getElementById('confirm-modal-bg').style.display = 'flex';
+}
+function closeConfirm() { document.getElementById('confirm-modal-bg').style.display = 'none'; pendingDeleteId = null; }
+async function confirmDelete() {
+  const id = pendingDeleteId;
+  closeConfirm();
+  const prev = [...items];
+  items = items.filter(i => i.id !== id);
+  render();
+  try {
+    const res = await fetch(`${API}?id=eq.${id}`, { method: 'DELETE', headers: H });
+    if (!res.ok) throw new Error(await res.text());
+  } catch(e) { items = prev; render(); showError('削除失敗: ' + e.message); }
 }
 
 async function loadItems() {
@@ -163,6 +299,7 @@ async function loadItems() {
     const res = await fetch(`${API}?order=created_at.asc`, { headers: H });
     if (!res.ok) throw new Error(await res.text());
     items = await res.json();
+    prevDoneCount = items.filter(i => i.done).length;
     render();
   } catch(e) { showError('読み込み失敗: ' + e.message); render(); }
 }
@@ -170,12 +307,13 @@ async function loadItems() {
 async function addItem() {
   const inp = document.getElementById('new-item');
   const cat = document.getElementById('new-cat').value;
+  const withWho = document.getElementById('new-with').value || null;
   const deadline = document.getElementById('new-deadline').value || null;
   const text = inp.value.trim();
   if (!text) return;
   inp.value = '';
   try {
-    const res = await fetch(API, { method: 'POST', headers: H, body: JSON.stringify({ text, cat, done: false, deadline }) });
+    const res = await fetch(API, { method: 'POST', headers: H, body: JSON.stringify({ text, cat, with_who: withWho, done: false, deadline }) });
     if (!res.ok) throw new Error(await res.text());
     const [item] = await res.json();
     items.push(item);
@@ -189,23 +327,40 @@ async function toggle(id) {
   const newDone = !item.done;
   const achieved_at = newDone ? new Date().toISOString() : null;
   item.done = newDone; item.achieved_at = achieved_at;
+  const newDoneCount = items.filter(i => i.done).length;
+  const prevBadge = getCurrentBadge(prevDoneCount);
+  const newBadge = getCurrentBadge(newDoneCount);
+  if (newDone) launchConfetti();
+  if (newBadge.req > prevBadge.req) setTimeout(() => alert(`🎉 新バッジ獲得！\n${newBadge.icon} ${newBadge.name}`), 500);
+  prevDoneCount = newDoneCount;
   render();
   try {
     const res = await fetch(`${API}?id=eq.${id}`, { method: 'PATCH', headers: H, body: JSON.stringify({ done: newDone, achieved_at }) });
     if (!res.ok) throw new Error(await res.text());
-    showError('');
   } catch(e) { item.done = !newDone; item.achieved_at = null; render(); showError('更新失敗: ' + e.message); }
 }
 
-async function del(id) {
-  const prev = [...items];
-  items = items.filter(i => i.id !== id);
-  render();
+function startEdit(id) { editingId = id; render(); const inp = document.getElementById(`edit-input-${id}`); if (inp) { inp.focus(); inp.select(); } }
+function cancelEdit() { editingId = null; render(); }
+
+async function saveEdit(id) {
+  const input = document.getElementById(`edit-input-${id}`);
+  const catSel = document.getElementById(`edit-cat-${id}`);
+  const withSel = document.getElementById(`edit-with-${id}`);
+  if (!input) return;
+  const text = input.value.trim();
+  if (!text) return;
+  const item = items.find(i => i.id === id);
+  if (!item) return;
+  const oldText = item.text, oldCat = item.cat, oldWith = item.with_who;
+  item.text = text;
+  if (catSel) item.cat = catSel.value;
+  if (withSel) item.with_who = withSel.value || null;
+  editingId = null; render();
   try {
-    const res = await fetch(`${API}?id=eq.${id}`, { method: 'DELETE', headers: H });
+    const res = await fetch(`${API}?id=eq.${id}`, { method: 'PATCH', headers: H, body: JSON.stringify({ text, cat: item.cat, with_who: item.with_who }) });
     if (!res.ok) throw new Error(await res.text());
-    showError('');
-  } catch(e) { items = prev; render(); showError('削除失敗: ' + e.message); }
+  } catch(e) { item.text = oldText; item.cat = oldCat; item.with_who = oldWith; render(); showError('編集失敗: ' + e.message); }
 }
 
 async function uploadMedia(id, file) {
@@ -231,9 +386,8 @@ async function uploadMedia(id, file) {
 
 function setFilter(f) {
   filter = f;
-  document.querySelectorAll('.tab').forEach((t, i) => {
-    t.classList.toggle('active', ['all','travel','hobby','career','done'][i] === f);
-  });
+  const filters = ['all','travel','experience','food','learn','other','done'];
+  document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', filters[i] === f));
   render();
 }
 
@@ -245,41 +399,62 @@ function render() {
   document.getElementById('stat-done').textContent = done;
   document.getElementById('stat-pct').textContent = pct + '%';
   document.getElementById('progress-fill').style.width = pct + '%';
-  document.getElementById('subtitle').textContent =
-    total === 0 ? 'さあ、夢を書き出そう' :
-    pct === 100 ? '全て達成！素晴らしい！🎉' :
-    `${done}/${total} 達成中`;
+  document.getElementById('subtitle').textContent = total === 0 ? 'さあ、夢を書き出そう' : pct === 100 ? '全て達成！素晴らしい！🎉' : `${done}/${total} 達成中`;
+  const badge = getCurrentBadge(done);
+  document.getElementById('current-badge').textContent = `${badge.icon} ${badge.name}  ›`;
 
+  const q = document.getElementById('search-input').value.toLowerCase();
   let visible = items;
   if (filter === 'done') visible = items.filter(i => i.done);
   else if (filter !== 'all') visible = items.filter(i => i.cat === filter);
+  if (q) visible = visible.filter(i => i.text.toLowerCase().includes(q));
 
   const el = document.getElementById('items-list');
   if (visible.length === 0) {
-    el.innerHTML = `<div class="empty"><span class="empty-icon">${filter==='done'?'🏆':'📝'}</span>${filter==='done'?'まだ達成したものがありません':'アイテムがありません'}</div>`;
+    el.innerHTML = `<div class="empty"><span class="empty-icon">${q?'🔍':filter==='done'?'🏆':'📝'}</span>${q?'見つかりませんでした':filter==='done'?'まだ達成したものがありません':'アイテムがありません'}</div>`;
     return;
   }
 
   el.innerHTML = visible.map(item => {
-    const isVideo = item.image_url && (item.image_url.includes('.mp4') || item.image_url.includes('.mov') || item.image_url.includes('.webm'));
-    const mediaHtml = item.image_url
-      ? `<div class="item-image">${isVideo
-          ? `<video src="${item.image_url}" controls playsinline></video>`
-          : `<img src="${item.image_url}" alt="達成の記録" loading="lazy">`
-        }</div>`
-      : '';
-
+    const isVideo = item.image_url && (item.image_url.includes('.mp4')||item.image_url.includes('.mov')||item.image_url.includes('.webm'));
+    const mediaHtml = item.image_url ? `<div class="item-image">${isVideo?`<video src="${item.image_url}" controls playsinline></video>`:`<img src="${item.image_url}" alt="達成の記録" loading="lazy">`}</div>` : '';
     const overdue = !item.done && isOverdue(item.deadline);
+    const isEditing = editingId === item.id;
 
-    return `<div class="item${item.done?' done':''}">
+    return `<div class="item${item.done?' done':''}"
+      oncontextmenu="startEdit(${item.id});return false;"
+      ontouchstart="startLongPress(${item.id})" ontouchend="cancelLongPress()" ontouchmove="cancelLongPress()">
       <div class="item-top">
-        <button class="check-btn${item.done?' checked':''}" onclick="toggle(${item.id})" aria-label="${item.done?'未達成に戻す':'達成済みにする'}">
+        <button class="check-btn${item.done?' checked':''}" onclick="toggle(${item.id})">
           <svg class="check-icon" viewBox="0 0 13 13"><polyline points="1.5,6.5 5,10 11,2.5"/></svg>
         </button>
         <div class="item-body">
-          <div class="item-text">${item.text}</div>
+          ${isEditing ? `
+            <input class="item-edit-input" id="edit-input-${item.id}" value="${item.text.replace(/"/g,'&quot;')}" onkeydown="if(event.key==='Enter')saveEdit(${item.id});if(event.key==='Escape')cancelEdit()">
+            <div class="item-edit-row">
+              <select id="edit-cat-${item.id}">
+                <option value="travel" ${item.cat==='travel'?'selected':''}>旅行</option>
+                <option value="experience" ${item.cat==='experience'?'selected':''}>体験</option>
+                <option value="food" ${item.cat==='food'?'selected':''}>食・グルメ</option>
+                <option value="learn" ${item.cat==='learn'?'selected':''}>学び・成長</option>
+                <option value="other" ${item.cat==='other'?'selected':''}>その他</option>
+              </select>
+              <select id="edit-with-${item.id}">
+                <option value="" ${!item.with_who?'selected':''}>誰と？</option>
+                <option value="solo" ${item.with_who==='solo'?'selected':''}>1人で</option>
+                <option value="friends" ${item.with_who==='friends'?'selected':''}>友達と</option>
+                <option value="partner" ${item.with_who==='partner'?'selected':''}>恋人と</option>
+                <option value="anyone" ${item.with_who==='anyone'?'selected':''}>誰でも</option>
+              </select>
+            </div>
+            <div class="item-edit-actions">
+              <button class="edit-save-btn" onclick="saveEdit(${item.id})">保存</button>
+              <button class="edit-cancel-btn" onclick="cancelEdit()">キャンセル</button>
+            </div>
+          ` : `<div class="item-text">${item.text}</div>`}
           <div class="item-meta">
-            <span class="cat-badge ${catClass[item.cat]}">${catLabel[item.cat]}</span>
+            <span class="cat-badge ${catClass[item.cat]||'cat-other'}">${catLabel[item.cat]||item.cat}</span>
+            ${item.with_who && withLabel[item.with_who] ? `<span class="with-badge">${withLabel[item.with_who]}</span>` : ''}
             ${item.deadline ? `<span class="deadline-badge${overdue?' overdue':''}">📅 ${formatDate(item.deadline)}${overdue?' 期限切れ':''}</span>` : ''}
             ${item.achieved_at ? `<span class="achieved-badge">✓ ${formatDate(item.achieved_at)} 達成</span>` : ''}
           </div>
@@ -290,13 +465,17 @@ function render() {
             <span class="uploading" id="upload-status-${item.id}"></span>
           ` : ''}
         </div>
-        <button class="del-btn" onclick="del(${item.id})" aria-label="削除">×</button>
+        <button style="background:transparent;border:none;color:#ddd;font-size:18px;cursor:pointer;padding:2px 4px;flex-shrink:0" onclick="askDelete(${item.id})">⋯</button>
       </div>
     </div>`;
   }).join('');
 }
 
 loadItems();
+
+async function ensureWithWhoColumn() {
+  await fetch(`${API}?id=eq.-1`, { method: 'PATCH', headers: H, body: JSON.stringify({}) }).catch(()=>{});
+}
 </script>
 </body>
 </html>
