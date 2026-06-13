@@ -503,7 +503,7 @@ function render() {
     const overdue = !item.done && isOverdue(item.deadline);
     const isEditing = editingId === item.id;
 
-    return `<div class="item${item.done?' done':''}">`
+    return `<div class="item${item.done?' done':''}">
       <div class="item-top">
         <button class="check-btn${item.done?' checked':''}" onclick="toggle(${item.id})">
           <svg class="check-icon" viewBox="0 0 13 13"><polyline points="1.5,6.5 5,10 11,2.5"/></svg>
