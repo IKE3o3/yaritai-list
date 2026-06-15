@@ -420,18 +420,16 @@ async function addItem() {
   const inp = document.getElementById('new-item');
   const cat = selectedCat || 'other';
   const withWho = selectedWith || null;
-  const deadline = document.getElementById('new-deadline').value || null;
   const text = inp.value.trim();
   if (!text) return;
   inp.value = '';
   try {
-    const res = await fetch(API, { method: 'POST', headers: H, body: JSON.stringify({ text, cat, with_who: withWho, done: false, deadline }) });
+    const res = await fetch(API, { method: 'POST', headers: H, body: JSON.stringify({ text, cat, with_who: withWho, done: false }) });
     if (!res.ok) throw new Error(await res.text());
     const [item] = await res.json();
     items.push(item);
     selectedWith = null;
     ['solo','friends','partner','anyone'].forEach(k => { const el = document.getElementById('with-'+k); if(el) el.classList.remove('selected'); });
-    document.getElementById('new-deadline').value = '';
     closeSheet();
     render(); showError('');
   } catch(e) { showError('追加失敗: ' + e.message); inp.value = text; }
