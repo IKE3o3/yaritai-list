@@ -58,16 +58,19 @@
     @keyframes fall { to { transform: translateY(110vh) rotate(720deg); opacity: 0; } }
 
     .stats-wrap { max-width: 640px; margin: -1.5rem auto 0; padding: 0 1rem; }
+    @media (min-width: 700px) { .stats-wrap { max-width: 1400px; padding: 0 2rem; } }
     .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
     .stat { background: #fff; border-radius: 14px; padding: 1rem; text-align: center; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
     .stat-num { font-size: 26px; font-weight: 700; color: #1D9E75; }
     .stat-label { font-size: 11px; color: #999; margin-top: 2px; }
 
     .progress-bar-wrap { max-width: 640px; margin: 1rem auto 0; padding: 0 1rem; }
+    @media (min-width: 700px) { .progress-bar-wrap { max-width: 1400px; padding: 0 2rem; } }
     .progress-bar-bg { background: #e0e0e0; border-radius: 99px; height: 6px; overflow: hidden; }
     .progress-bar-fill { background: linear-gradient(90deg, #1D9E75, #5DCAA5); height: 100%; border-radius: 99px; transition: width .5s ease; }
 
     .container { max-width: 640px; margin: 0 auto; padding: 1.25rem 1rem 5rem; }
+    @media (min-width: 700px) { .container { max-width: 1400px; padding: 1.25rem 2rem 5rem; } }
 
     .search-wrap { margin-bottom: 1rem; position: relative; }
     .search-wrap input { width: 100%; font-size: 14px; padding: 10px 14px 10px 38px; border-radius: 12px; border: 1.5px solid #e0e0e0; background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
@@ -111,7 +114,7 @@
     .add-card input[type=date] { flex: 1; min-width: 120px; font-size: 13px; padding: 9px 10px; border-radius: 10px; border: 1.5px solid #e0e0e0; background: #fafafa; color: #444; }
     .add-btn { padding: 9px 20px; border-radius: 10px; border: none; background: #1D9E75; color: #fff; font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; }
 
-    .items { display: grid; grid-template-columns: 1fr; gap: 10px; }
+    .items { display: grid; grid-template-columns: 1fr; gap: 10px; align-items: start; }
     @media (min-width: 700px) { .items { grid-template-columns: repeat(2, 1fr); } }
     @media (min-width: 1100px) { .items { grid-template-columns: repeat(3, 1fr); } }
     .item { background: #fff; border-radius: 16px; padding: 1rem 1.1rem; box-shadow: 0 2px 10px rgba(0,0,0,0.06); overflow: hidden; transition: opacity .2s; }
