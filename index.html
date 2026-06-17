@@ -149,8 +149,11 @@
     .deadline-badge.overdue { color: #e05; }
     .achieved-badge { font-size: 11px; color: #1D9E75; }
     .item-memo { font-size: 12px; color: #888; margin-top: 4px; line-height: 1.4; }
-    .priority-section { margin-bottom: 16px; }
+    .priority-section { margin-bottom: 16px; grid-column: 1 / -1; }
     .priority-label { font-size: 12px; font-weight: 700; color: #E07B00; margin-bottom: 8px; display: flex; align-items: center; gap: 5px; }
+    .priority-items { display: grid; grid-template-columns: 1fr; gap: 10px; align-items: start; }
+    @media (min-width: 700px) { .priority-items { grid-template-columns: repeat(2, 1fr); } }
+    @media (min-width: 1100px) { .priority-items { grid-template-columns: repeat(3, 1fr); } }
     .item.priority { border-left: 3px solid #F5A623; }
 
     .item-image { margin-top: 10px; border-radius: 10px; overflow: hidden; }
@@ -554,9 +557,15 @@ function render() {
   document.getElementById('current-badge').textContent = `${badge.icon} ${badge.name}  ›`;
 
   const q = document.getElementById('search-input').value.toLowerCase();
-  let visible = [...items].sort((a, b) => a.done - b.done);
-  if (filter === 'done') visible = visible.filter(i => i.done);
-  else if (filter !== 'all') visible = visible.filter(i => i.cat === filter);
+  const catOrder = { travel: 0, experience: 1, food: 2, learn: 3, other: 4 };
+  let visible;
+  if (filter === 'done') {
+    visible = items.filter(i => i.done).sort((a, b) => new Date(b.achieved_at||0) - new Date(a.achieved_at||0));
+  } else if (filter === 'all') {
+    visible = [...items].sort((a, b) => a.done - b.done || (catOrder[a.cat]??9) - (catOrder[b.cat]??9));
+  } else {
+    visible = [...items].filter(i => i.cat === filter).sort((a, b) => a.done - b.done);
+  }
   if (filterWith) visible = visible.filter(i => i.with_who === filterWith);
   if (q) visible = visible.filter(i => i.text.toLowerCase().includes(q));
 
@@ -568,7 +577,7 @@ function render() {
 
   const priorityItems = visible.filter(i => i.priority && !i.done);
   const restItems = visible.filter(i => !i.priority || i.done);
-  const priorityHtml = priorityItems.length ? `<div class="priority-section"><div class="priority-label">🔥 Next Up</div><div class="items" style="gap:10px">${priorityItems.map(item => renderItem(item)).join('')}</div></div>` : '';
+  const priorityHtml = priorityItems.length ? `<div class="priority-section"><div class="priority-label">🔥 Next Up</div><div class="priority-items">${priorityItems.map(item => renderItem(item)).join('')}</div></div>` : '';
   el.innerHTML = priorityHtml + restItems.map(item => renderItem(item)).join('');
 }
 
