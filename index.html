@@ -15,8 +15,10 @@
     body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', sans-serif; background: #f0f4f0; min-height: 100vh; color: #1a1a1a; }
 
     .header { background: #1D9E75; padding: 1.5rem 1rem 1rem; text-align: center; }
+    .header { position: relative; }
     .header h1 { font-size: 22px; font-weight: 700; color: #fff; letter-spacing: 0.02em; }
     .header .subtitle { font-size: 13px; color: rgba(255,255,255,0.75); margin-top: 4px; }
+    .csv-btn { position: absolute; top: 1rem; right: 1rem; background: rgba(255,255,255,0.2); border: none; color: #fff; font-size: 12px; padding: 5px 10px; border-radius: 8px; cursor: pointer; }
 
     .badge-bar { background: #1D9E75; padding: 0.5rem 1rem 2rem; display: flex; justify-content: center; }
     .badge-pill { background: rgba(255,255,255,0.2); border-radius: 99px; padding: 6px 16px; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: #fff; font-weight: 600; cursor: pointer; border: none; }
@@ -175,6 +177,7 @@
 <div class="header">
   <h1>✦ やりたいことリスト</h1>
   <p class="subtitle" id="subtitle">さあ、夢を書き出そう</p>
+  <button class="csv-btn" onclick="exportCSV()">CSV</button>
 </div>
 <div class="badge-bar">
   <button class="badge-pill" onclick="openBadgeModal()" id="current-badge">🌱 はじめの一歩  ›</button>
@@ -629,6 +632,23 @@ function renderItem(item) {
         <button style="background:transparent;border:none;color:#bbb;font-size:20px;cursor:pointer;padding:2px 8px;flex-shrink:0;line-height:1" onclick="openActionMenu(${item.id},this)">⋯</button>
       </div>
     </div>`;
+}
+
+function exportCSV() {
+  const header = ['やりたいこと', 'カテゴリ', '誰と', '達成', '達成日', 'メモ'];
+  const rows = items.map(i => [
+    i.text,
+    catLabel[i.cat] || i.cat,
+    withLabel[i.with_who] || '',
+    i.done ? '達成済み' : '未達成',
+    i.achieved_at ? i.achieved_at.slice(0, 10) : '',
+    i.memo || ''
+  ].map(v => `"${String(v).replace(/"/g, '""')}"`).join(','));
+  const csv = '﻿' + [header.join(','), ...rows].join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+  a.download = 'やりたいことリスト.csv';
+  a.click();
 }
 
 loadItems();
